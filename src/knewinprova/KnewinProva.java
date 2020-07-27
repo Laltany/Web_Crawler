@@ -41,7 +41,7 @@ public class KnewinProva {
                for(Element e: news){
                    if(count<5){
                         org.jsoup.select.Elements category = e.select("category");
-                        for(Element categoria: category){
+                        for(var categoria: category){
                             if("Mercados".equals(categoria.text())){
                                  org.jsoup.select.Elements link = e.select("link");
                                  org.jsoup.select.Elements title = e.select("title");
@@ -83,7 +83,8 @@ public class KnewinProva {
                                  System.out.println("Noticia: " + article);
                                  System.out.println("---------------------------");
 
-                                 count++;                                         
+                                 count++;  
+                                 System.out.println("AQUI FOI!");
 
                             }                      
 
@@ -104,19 +105,17 @@ public class KnewinProva {
            // Document doc = Jsoup.connect(url).get();
             Document doc = Jsoup.parse(new URL(url).openStream(), "UTF-8", "", Parser.xmlParser());
             org.jsoup.select.Elements news = doc.select("item");
-            for(Element e: news){
+            news.stream().map(e -> {
                 org.jsoup.select.Elements link = e.select("link");
                 org.jsoup.select.Elements title = e.select("title");
                 org.jsoup.select.Elements subtitle_ = e.select("description");
                 org.jsoup.select.Elements creator = e.getElementsByTag("dc:creator");
                 org.jsoup.select.Elements datetime_ = e.getElementsByTag("pubDate");
                 org.jsoup.select.Elements article_ = e.getElementsByTag("content:encoded");
-
                 /* parse subtitle */
                 String subtitle_temp = subtitle_.text();
                 Document doc_subtitle = Jsoup.parse(subtitle_temp);
                 org.jsoup.select.Elements subtitle = doc_subtitle.select("p");
-
                 /* parse article_ */
 
                 String article_text = article_.text();
@@ -124,8 +123,6 @@ public class KnewinProva {
                 org.jsoup.select.Elements article_body = doc_article.select("p");
                 String article = article_body.text();
                 article = article.replace(" appeared first on InfoMoney", "");
-
-
                 /* parse e conversão datetime*/
                 String datetime_temp = datetime_.text();
                 String[] list_datetime = datetime_temp.split(",");
@@ -136,20 +133,21 @@ public class KnewinProva {
                 date = date.replace(" +0000","");
                 int tamanho = date.length();
                 date = date.substring(0, tamanho-3);
-
-
                 /* imprimir */
                 System.out.println("link: " + link.text());
                 System.out.println("Titulo: " + title.text());
-                System.out.println("Subtitulo: " + (subtitle.first()).text());
+                System.out.println("Subtitulo: " + (subtitle.get(0)).text());
                 System.out.println("Autor: " + creator.text());
                 System.out.println("Data de Publicação: " + date);
                 System.out.println("Noticia: " + article);
-                System.out.println("---------------------------");
-            }
+                   return e;
+               }).forEachOrdered(_item -> {
+                   System.out.println("---------------------------");
+               });
            }
        }catch(IOException ex){
            Logger.getLogger(KnewinProva.class.getName()).log(Level.SEVERE, null, ex);
+           
        }
         // TODO code application logic here
     }
